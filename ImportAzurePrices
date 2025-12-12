@@ -1,0 +1,25 @@
+
+function ImportAzurePrices() {
+  const azureApiBaseUri = "https://prices.azure.com/api/retail/prices?currencyCode='USD'&$filter=serviceFamily eq 'Compute'";
+
+  const response = UrlFetchApp.fetch(azureApiBaseUri);
+  const results = JSON.parse(response);
+
+
+  
+  
+  const headers = Object.keys(results.Items[0]);
+  const values = results.Items.map(obj => headers.map(header => obj[header] || ""));
+
+  const dataToWrite = [headers, ...values];
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+
+  const range = sheet.getRange(1, 1, dataToWrite.length, dataToWrite[0].length);
+
+  range.setValues(dataToWrite);
+
+  console.log("JSON data successfully imported into sheet.");
+
+}
