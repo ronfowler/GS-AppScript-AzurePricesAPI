@@ -1,21 +1,25 @@
 
-function ImportAzurePrices() {
-  const azureApiBaseUri = "https://prices.azure.com/api/retail/prices?currencyCode='USD'&$filter=serviceFamily eq 'Compute'";
+function ImportAzurePrices(currencyCode='USD', regionName='eastus', typeName='Consumption') {
+    
+  const azureAPIParameters = "?currencyCode='" + currencyCode + "'&$filter=serviceFamily eq 'Compute' and armRegionName eq '" + regionName + "' and type eq '" + typeName + "'";
+  const azureApiBaseUri = "https://prices.azure.com/api/retail/prices"
+  const azureAPIRequestUrl = azureApiBaseUri + azureAPIParameters
 
-  const response = UrlFetchApp.fetch(azureApiBaseUri);
+  Logger.log({key: azureAPIParameters});
+  Logger.log({key: azureAPIRequestUrl});
+
+  // Get the data from Azure Price API
+  const response = UrlFetchApp.fetch(azureAPIRequestUrl);
+
+  // Parse the data
   const results = JSON.parse(response);
-
-
   
-  
+  // Set the headers
   const headers = Object.keys(results.Items[0]);
+  
   const values = results.Items.map(obj => headers.map(header => obj[header] || ""));
-
   const dataToWrite = [headers, ...values];
-
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
-
   const range = sheet.getRange(1, 1, dataToWrite.length, dataToWrite[0].length);
 
   range.setValues(dataToWrite);
